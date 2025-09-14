@@ -1,6 +1,9 @@
 # Environment variables
 .env
 
+# others
+src/*.ipynb
+
 # Python cache
 __pycache__/
 *.pyc
