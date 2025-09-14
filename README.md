@@ -10,15 +10,15 @@ To improve my skills, I'm replicating the exercises using Azure.
 ├── .devcontainer/          # Development container configuration
 ├── src/
 │   └── notebooks/          # Jupyter notebooks with lab exercises
-│       ├── lab01.ipynb     # Authentication Workflow with LangGraph
-│       └── lab - LangGraph101 - Building Stateful AI Workflows.ipynb
+│       ├── lab01_01_check_credentials.ipynb     # Authentication Workflow with LangGraph
+│       └── lab01_02_chatbot.ipynb     # Q&A Chatbot with Context-Aware Responses
 ├── .gitignore              # Git ignore rules
 └── README.md               # This file
 ```
 
-## Lab 01: Authentication Workflow
+## Lab 01.1: Authentication Workflow
 
-The `lab01.ipynb` notebook demonstrates how to build a stateful authentication workflow using LangGraph. The workflow includes:
+The `lab01_01_check_credentials.ipynb` notebook demonstrates how to build a stateful authentication workflow using LangGraph. The workflow includes:
 
 ### Features
 - **State management:** Using TypedDict to maintain authentication state.
@@ -41,13 +41,47 @@ The `lab01.ipynb` notebook demonstrates how to build a stateful authentication w
 4. `Success` → `END` (successful login)
 5. `Failure` → `Input` (retry authentication)
 
+## Lab 01.2: Q&A Chatbot with Context-Aware Responses
+
+The `lab01_02_chatbot.ipynb` notebook demonstrates how to build a context-aware Q&A chatbot using LangGraph and Azure OpenAI. This lab showcases:
+
+### Features
+- **Context-aware responses:** The chatbot provides different responses based on available context
+- **Question processing:** Input validation and question handling
+- **Dynamic context provision:** Context is provided only for relevant questions
+- **Azure OpenAI integration:** Uses Azure ChatOpenAI for generating intelligent responses
+- **Graceful fallbacks:** Handles questions without context appropriately
+
+### Workflow Nodes
+- **Input Node:** Processes and validates the incoming question
+- **Context Provider Node:** Determines if context is available for the question (currently supports LangGraph-related questions)
+- **Answer Node:** Generates responses using Azure OpenAI, incorporating context when available
+
+### Workflow Flow
+1. `START` → `Input` (process question)
+2. `Input` → `ContextProvider` (check for relevant context)
+3. `ContextProvider` → `Answer` (generate response with or without context)
+4. `Answer` → `END` (return final answer)
+
+### Example Usage
+- **Question with context:** "What is LangGraph?" → Provides detailed answer using available context
+- **Question without context:** "What's the weather like?" → Returns appropriate fallback response
+
+### Azure OpenAI Configuration
+The notebook uses Azure OpenAI with the following configuration:
+- Model: `gpt-4o-mini` (configurable)
+- Temperature: 0.7 for balanced creativity
+- Max tokens: 1024
+- Request timeout: 120 seconds
+- Top-p: 0.95 for diverse responses
+
 ## Prerequisites
 
 - Python 3.11 or newer
 - Jupyter Notebook or JupyterLab environment
 - Required packages (installed automatically in the dev container):
     - `langgraph`
-    - `langchain-openai`
+    - `langchain-openai` (for Azure OpenAI integration)
     - `python-dotenv`
     - `grandalf` (for graph visualization)
     - `matplotlib` (for plotting)
@@ -57,7 +91,7 @@ The `lab01.ipynb` notebook demonstrates how to build a stateful authentication w
 
 1. Clone this repository.
 2. Open it in VS Code using the dev container (recommended).
-3. Create a `.env` file with your Azure OpenAI credentials (if required for certain exercises):
+3. Create a `.env` file with your Azure OpenAI credentials (required for the chatbot lab):
      ```
      AZURE_OPENAI_API_KEY=your_api_key_here
      AZURE_OPENAI_ENDPOINT=your_endpoint_here
