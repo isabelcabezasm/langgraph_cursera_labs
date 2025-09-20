@@ -13,7 +13,8 @@ To improve my skills, I'm replicating the exercises using Azure.
 │       ├── lab01_01_check_credentials.ipynb     # Authentication Workflow with LangGraph
 │       ├── lab01_02_chatbot.ipynb     # Q&A Chatbot with Context-Aware Responses
 │       ├── lab02_reflection_agent.ipynb        # Self-Improving Content Generation Agent
-│       └── lab03_reflexion_agent.ipynb         # Reflection Agent with External Knowledge Integration
+│       ├── lab03_reflexion_agent.ipynb         # Reflection Agent with External Knowledge Integration (Tavily)
+│       └── lab03_reflexion_agent_using_bing_websearch.ipynb # Reflection Agent with Azure Bing Search
 ├── .gitignore              # Git ignore rules
 └── README.md               # This file
 ```
@@ -265,6 +266,129 @@ class ReviseAnswer(AnswerQuestion):
 - **Top-p:** 0.95 for diverse, high-quality outputs
 
 
+## Lab 03 Alternative: Building a Reflection Agent with Azure Bing Search Integration
+
+The `lab03_reflexion_agent_using_bing_websearch.ipynb` notebook provides an alternative implementation of Lab 03 that uses **Azure Bing Search** instead of Tavily for external knowledge retrieval. This variant demonstrates how to integrate Microsoft's Bing Search API for real-time web content access.
+
+### Key Differences from Original Lab 03
+
+#### External Knowledge Provider
+- **Original:** Tavily Search API for web content retrieval
+- **Alternative:** Azure Bing Search v7 API with native Microsoft integration
+
+#### Search Tool Implementation
+- **Simplified Architecture:** Direct Azure Bing Search integration without Tavily compatibility layers
+- **Native Format:** Returns Bing's natural response structure (`title`, `url`, `snippet`)
+- **Azure Ecosystem Integration:** Seamless integration with other Azure services
+- **Enterprise-Ready:** Built on Microsoft's enterprise-grade search infrastructure
+
+### Features Specific to Bing Search Variant
+- **Azure Cognitive Services Integration:** Uses Azure's unified API management and authentication
+- **Native Bing Search Format:** No format conversion required - uses Bing's natural response structure
+- **Simplified Configuration:** Single API key setup through Azure Portal
+- **Enhanced Error Handling:** Azure-specific error handling and retry logic
+- **SafeSearch Integration:** Built-in content filtering using Bing's SafeSearch capabilities
+
+### Workflow Architecture (Bing Search Variant)
+The Bing Search implementation maintains the same sophisticated three-node workflow as the original:
+
+#### Core Components
+- **AgentState:** Identical TypedDict-based state management
+- **bing_search_tool():** Simplified search function using Azure Bing Search API
+- **Structured Tool Calling:** Same Pydantic models for reliable AI-tool communication
+- **Conditional Iteration Control:** Identical smart routing and iteration management
+
+#### Key Technical Improvements
+- **Simplified Search Integration:** Removed Tavily compatibility layers for cleaner code
+- **Native Response Format:** Direct use of Bing's response structure without format conversion
+- **Reduced Dependencies:** Fewer external packages required
+- **Azure-Native Architecture:** Better integration with Azure ecosystem services
+
+### Bing Search Tool Implementation
+```python
+def bing_search_tool(query: str, max_results: int = 1):
+    """
+    Azure Bing Web Search tool for LangGraph workflow
+    """
+    if not bing_client:
+        return {"error": "Azure Bing Search not configured"}
+    
+    try:
+        web_data = bing_client.web.search(
+            query=query,
+            count=max_results,
+            safe_search=SafeSearch.moderate
+        )
+        
+        if web_data.web_pages and web_data.web_pages.value:
+            results = []
+            for page in web_data.web_pages.value[:max_results]:
+                results.append({
+                    "title": page.name,
+                    "url": page.url,
+                    "snippet": page.snippet
+                })
+            return {"results": results, "query": query}
+    except Exception as e:
+        return {"error": f"Bing search failed: {str(e)}", "query": query}
+```
+
+### Setup Requirements (Bing Search Variant)
+
+#### Azure Bing Search v7 Configuration
+1. **Create Bing Search Resource:**
+   - Go to [Azure Portal](https://portal.azure.com/)
+   - Create a new **Bing Search v7** resource
+   - Choose your subscription and resource group
+   - Select pricing tier (F1 free tier available)
+
+2. **Get API Credentials:**
+   - Navigate to "Keys and Endpoint" in your Bing Search resource
+   - Copy the API key (Key 1 or Key 2)
+   - Default endpoint: `https://api.bing.microsoft.com/`
+
+3. **Environment Configuration:**
+   ```env
+   # Add to your .env file
+   BING_SEARCH_API_KEY=your_bing_search_api_key_here
+   ```
+
+#### Required Python Packages
+```bash
+pip install azure-cognitiveservices-search-websearch
+```
+
+### Workflow Flow (Identical to Original)
+1. `START` → `Respond` (generate initial answer with search queries)
+2. `Respond` → `Execute Tools` (perform Bing searches based on generated queries)
+3. `Execute Tools` → `Revisor` (synthesize research into improved response)
+4. `Revisor` → `Execute Tools` (conditional: continue research if needed)
+5. **Repeat steps 3-4** until research threshold is met (MAX_ITERATIONS = 4)
+6. `Revisor` → `END` (finalize evidence-based response)
+
+### Advantages of Bing Search Implementation
+- **Enterprise Integration:** Native Azure ecosystem integration
+- **Simplified Codebase:** Cleaner implementation without compatibility layers
+- **Cost Efficiency:** Competitive pricing with free tier availability
+- **Microsoft Ecosystem:** Better integration with other Microsoft AI services
+- **Reliability:** Enterprise-grade infrastructure and uptime guarantees
+- **SafeSearch:** Built-in content filtering and safety controls
+
+### When to Use Which Version
+- **Use Tavily Version (`lab03_reflexion_agent.ipynb`)** when:
+  - You need specialized academic/research content
+  - You prefer Tavily's curated search results
+  - You're already using Tavily in other projects
+
+- **Use Bing Search Version (`lab03_reflexion_agent_using_bing_websearch.ipynb`)** when:
+  - You're working within the Azure ecosystem
+  - You prefer Microsoft's enterprise-grade services
+  - You want simplified setup and maintenance
+  - You need SafeSearch content filtering capabilities
+
+Both implementations provide identical AI agent capabilities with different external knowledge providers, allowing you to choose based on your specific requirements and infrastructure preferences.
+
+
 ## Prerequisites
 
 - Python 3.11 or newer
@@ -279,7 +403,8 @@ class ReviseAnswer(AnswerQuestion):
     - `networkx` (for graph operations)
     - `pygraphviz` (for advanced graph visualization)
     - `pydantic` (for structured data validation)
-    - `tavily-python` (for external knowledge retrieval)
+    - `tavily-python` (for external knowledge retrieval in original Lab 03)
+    - `azure-cognitiveservices-search-websearch` (for Bing Search integration in Lab 03 alternative)
 
 ## Setup
 
@@ -292,8 +417,11 @@ class ReviseAnswer(AnswerQuestion):
      AZURE_OPENAI_ENDPOINT=your_azure_endpoint_here
      OPENAI_API_VERSION=your_api_version_here
      
-     # Tavily Search API (required for Lab 03)
+     # Tavily Search API (required for original Lab 03)
      TAVILY_API_KEY=your_tavily_api_key_here
+     
+     # Azure Bing Search API (required for Lab 03 Bing Search variant)
+     BING_SEARCH_API_KEY=your_bing_search_api_key_here
      ```
 4. Open and run the notebooks in the `src/notebooks/` directory.
 
@@ -304,11 +432,20 @@ class ReviseAnswer(AnswerQuestion):
 2. Deploy a GPT model (recommended: `gpt-4o-mini`)
 3. Copy the API key, endpoint, and API version from the Azure Portal
 
-#### Tavily Search API (Required for Lab 03)
+#### Tavily Search API (Required for Original Lab 03)
 1. Sign up at [Tavily.com](https://tavily.com/)
 2. Create a free account (includes generous free tier)
 3. Generate an API key from your dashboard
 4. Add the key to your `.env` file
+
+#### Azure Bing Search API (Required for Lab 03 Bing Search Variant)
+1. Go to [Azure Portal](https://portal.azure.com/)
+2. Create a **Bing Search v7** resource
+3. Choose your subscription and resource group
+4. Select pricing tier (F1 free tier available for testing)
+5. Copy the API key from the resource's "Keys and Endpoint" section
+6. Add the key to your `.env` file
+7. The endpoint is typically: `https://api.bing.microsoft.com/`
 
 ## Visualization
 
