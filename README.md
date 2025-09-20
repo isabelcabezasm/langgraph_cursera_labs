@@ -14,7 +14,8 @@ To improve my skills, I'm replicating the exercises using Azure.
 │       ├── lab01_02_chatbot.ipynb     # Q&A Chatbot with Context-Aware Responses
 │       ├── lab02_reflection_agent.ipynb        # Self-Improving Content Generation Agent
 │       ├── lab03_reflexion_agent.ipynb         # Reflection Agent with External Knowledge Integration (Tavily)
-│       └── lab03_reflexion_agent_using_bing_websearch.ipynb # Reflection Agent with Azure Bing Search
+│       ├── lab03_reflexion_agent_using_bing_websearch.ipynb # Reflection Agent with Azure Bing Search
+│       └── lab03_reflexion_agent_using_langchain_tool_bing_search.ipynb # Reflection Agent with LangChain Bing Search Tools
 ├── .gitignore              # Git ignore rules
 └── README.md               # This file
 ```
@@ -389,6 +390,157 @@ pip install azure-cognitiveservices-search-websearch
 Both implementations provide identical AI agent capabilities with different external knowledge providers, allowing you to choose based on your specific requirements and infrastructure preferences.
 
 
+## Lab 03 LangChain Alternative: Building a Reflection Agent with LangChain Bing Search Tools
+
+The `lab03_reflexion_agent_using_langchain_tool_bing_search.ipynb` notebook provides another alternative implementation of Lab 03 that uses **LangChain's Bing Search tools** (`BingSearchResults` and `BingSearchAPIWrapper`) for external knowledge retrieval. This variant demonstrates the most modern approach using LangChain's standardized tool interfaces.
+
+### Key Differences from Other Lab 03 Variants
+
+#### Search Tool Implementation
+- **Original:** Raw Tavily Search API with custom integration
+- **Bing Websearch:** Direct Azure Bing Search SDK with custom wrapper
+- **LangChain Bing (This variant):** LangChain's standardized `BingSearchResults` tool with `BingSearchAPIWrapper`
+
+#### Architecture Advantages
+- **Standardized Interface:** Uses LangChain's consistent tool interface across all search providers
+- **Built-in Error Handling:** LangChain tools include robust error handling and retry logic
+- **Tool Ecosystem Integration:** Seamless integration with other LangChain tools and agents
+- **Simplified Implementation:** Pre-built tool abstractions reduce custom code requirements
+- **Future-Proof:** Benefits from LangChain community improvements and updates
+
+### Features Specific to LangChain Bing Search Variant
+- **LangChain Tool Interface:** Native compatibility with LangChain's tool calling patterns
+- **Simplified Tool Integration:** Uses `tool.invoke()` pattern consistent across LangChain ecosystem
+- **Automatic Result Formatting:** Built-in result standardization for AI consumption
+- **Enhanced Error Recovery:** LangChain's tool framework provides graceful error handling
+- **Consistent API:** Same interface patterns as other LangChain search tools (Google, DuckDuckGo, etc.)
+
+### Setup Requirements (LangChain Bing Search Variant)
+
+#### Environment Configuration
+```env
+# Add to your .env file (note the variable name)
+BING_SEARCH_API_KEY=your_bing_search_api_key_here
+```
+
+#### Azure Bing Search v7 Setup
+1. **Create Bing Search Resource:**
+   - Go to [Azure Portal](https://portal.azure.com/)
+   - Create a new **Bing Search v7** resource
+   - Copy the subscription key
+
+2. **LangChain Tool Configuration:**
+   ```python
+   from langchain_community.tools.bing_search import BingSearchResults
+   from langchain_community.utilities import BingSearchAPIWrapper
+   
+   # Initialize with proper API wrapper
+   bing_search_wrapper = BingSearchAPIWrapper(
+       bing_subscription_key=os.getenv("BING_SEARCH_API_KEY")
+   )
+   bing_tool = BingSearchResults(
+       api_wrapper=bing_search_wrapper, 
+       num_results=1
+   )
+   ```
+
+### Tool Integration Implementation
+```python
+def execute_tools(state: AgentState) -> AgentState:
+    messages = state["messages"]
+    last_ai_message = messages[-1]
+    tool_messages = []
+    
+    if hasattr(last_ai_message, 'tool_calls') and last_ai_message.tool_calls:
+        for tool_call in last_ai_message.tool_calls:
+            if tool_call["name"] in ["AnswerQuestion", "ReviseAnswer"]:
+                call_id = tool_call["id"]
+                search_queries = tool_call["args"].get("search_queries", [])
+                query_results = {}
+                
+                if bing_tool is not None:
+                    for query in search_queries:
+                        try:
+                            # Uses LangChain's standardized tool interface
+                            result = bing_tool.invoke(query)
+                            query_results[query] = result
+                        except Exception as e:
+                            query_results[query] = f"Search error: {str(e)}"
+                
+                tool_message = ToolMessage(
+                    content=json.dumps(query_results),
+                    tool_call_id=call_id
+                )
+                tool_messages.append(tool_message)
+    
+    return {"messages": tool_messages}
+```
+
+### Error Handling and Graceful Degradation
+The LangChain variant includes enhanced error handling:
+
+```python
+# Initialize Bing search tool with proper error handling
+try:
+    bing_search_wrapper = BingSearchAPIWrapper(
+        bing_subscription_key=os.getenv("BING_SEARCH_API_KEY")
+    )
+    bing_tool = BingSearchResults(
+        api_wrapper=bing_search_wrapper, 
+        num_results=1
+    )
+    print("✅ Bing search tool initialized successfully!")
+except Exception as e:
+    print(f"❌ Error initializing Bing search tool: {e}")
+    print("Please set the BING_SEARCH_API_KEY environment variable")
+    bing_tool = None
+```
+
+### Workflow Flow (Identical to Other Variants)
+1. `START` → `Respond` (generate initial answer with search queries)
+2. `Respond` → `Execute Tools` (perform Bing searches using LangChain tools)
+3. `Execute Tools` → `Revisor` (synthesize research into improved response)
+4. `Revisor` → `Execute Tools` (conditional: continue research if needed)
+5. **Repeat steps 3-4** until research threshold is met (MAX_ITERATIONS = 4)
+6. `Revisor` → `END` (finalize evidence-based response)
+
+### Advantages of LangChain Bing Search Implementation
+- **Ecosystem Integration:** Native compatibility with all LangChain tools and agents
+- **Standardized Interface:** Consistent patterns across different search providers
+- **Community Support:** Benefits from LangChain community improvements and bug fixes
+- **Tool Chaining:** Easy integration with other LangChain tools in complex workflows
+- **Simplified Maintenance:** Less custom code to maintain and debug
+- **Flexible Switching:** Easy to swap between different search providers using same interface
+
+### Required Python Packages
+```bash
+pip install langchain-community  # Includes BingSearchResults and BingSearchAPIWrapper
+```
+
+### When to Use the LangChain Bing Search Version
+**Use this variant when:**
+- You're building LangChain-based applications and want consistent tool interfaces
+- You plan to use multiple LangChain tools in your workflow
+- You prefer standardized, community-maintained tool implementations
+- You want to easily switch between different search providers in the future
+- You value ecosystem integration over custom implementations
+
+### Comparison of All Lab 03 Variants
+
+| Feature | Original (Tavily) | Bing Websearch | LangChain Bing |
+|---------|------------------|----------------|----------------|
+| **Search Provider** | Tavily API | Azure Bing Search SDK | LangChain Bing Tools |
+| **Integration Type** | Direct API | Custom SDK wrapper | LangChain tool interface |
+| **Code Complexity** | Medium | High (custom wrapper) | Low (standardized) |
+| **Ecosystem Integration** | Tavily-specific | Azure-specific | LangChain ecosystem |
+| **Maintenance** | API-dependent | Custom code maintenance | Community-maintained |
+| **Flexibility** | Tavily features | Full Bing features | LangChain abstractions |
+| **Error Handling** | Custom implementation | Custom implementation | Built-in LangChain handling |
+| **Future-Proofing** | Tavily roadmap | Azure updates | LangChain community |
+
+All three implementations provide identical AI agent capabilities with different external knowledge integration approaches, allowing you to choose based on your specific technical requirements, existing infrastructure, and development preferences.
+
+
 ## Prerequisites
 
 - Python 3.11 or newer
@@ -420,7 +572,7 @@ Both implementations provide identical AI agent capabilities with different exte
      # Tavily Search API (required for original Lab 03)
      TAVILY_API_KEY=your_tavily_api_key_here
      
-     # Azure Bing Search API (required for Lab 03 Bing Search variant)
+     # Azure Bing Search API (required for Lab 03 Bing Search variants)
      BING_SEARCH_API_KEY=your_bing_search_api_key_here
      ```
 4. Open and run the notebooks in the `src/notebooks/` directory.
@@ -438,14 +590,16 @@ Both implementations provide identical AI agent capabilities with different exte
 3. Generate an API key from your dashboard
 4. Add the key to your `.env` file
 
-#### Azure Bing Search API (Required for Lab 03 Bing Search Variant)
+#### Azure Bing Search API (Required for Lab 03 Bing Search Variants)
 1. Go to [Azure Portal](https://portal.azure.com/)
 2. Create a **Bing Search v7** resource
 3. Choose your subscription and resource group
 4. Select pricing tier (F1 free tier available for testing)
 5. Copy the API key from the resource's "Keys and Endpoint" section
-6. Add the key to your `.env` file
+6. Add the key to your `.env` file as `BING_SEARCH_API_KEY`
 7. The endpoint is typically: `https://api.bing.microsoft.com/`
+
+**Note:** Both Bing Search variants (`lab03_reflexion_agent_using_bing_websearch.ipynb` and `lab03_reflexion_agent_using_langchain_tool_bing_search.ipynb`) use the same `BING_SEARCH_API_KEY` environment variable, making it easy to switch between implementations.
 
 ## Visualization
 
