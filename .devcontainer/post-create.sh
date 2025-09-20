@@ -13,17 +13,15 @@ echo "Installing Python packages..."
 
 pip install \
     langchain_openai==0.2.0 \
-    langchain==0.3.0 \
+    langchain==0.3.23 \
     langgraph==0.2.32 \
     joblib==1.4.2 \
-    'mlflow[databricks]'==2.20.3 \
     azure-identity \
     pydantic \
-    databricks-sdk \
-    databricks-cli \
     python-dotenv \
     langchain_community==0.3.21  \
-    pygraphviz==1.14
+    pygraphviz==1.14 \
+    azure-cognitiveservices-search-websearch==2.0.1
 
 # Install Jupyter kernel so notebooks in this workspace can run
 if command -v python3 >/dev/null 2>&1; then
