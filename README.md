@@ -26,6 +26,9 @@ Uses LangChain's standardized Bing Search tools for consistent interface pattern
 
 All Lab 03 variants implement the same AI agent with different search providers for external knowledge retrieval.
 
+### Lab 04: ReAct Agent with Tool Calling
+Implementation of the ReAct (Reasoning and Acting) pattern with multi-tool integration. Demonstrates both manual step-by-step execution and automated graph-based workflow using Tavily search and clothing recommendation tools.
+
 ## Quick Setup
 
 1. Clone repository and open in VS Code dev container
@@ -42,7 +45,7 @@ All Lab 03 variants implement the same AI agent with different search providers 
 ## API Keys Required
 
 - **Azure OpenAI**: All labs except 01.1
-- **Tavily Search**: Original Lab 03 only  
+- **Tavily Search**: Original Lab 03 and Lab 04
 - **Bing Search**: Lab 03 Bing variants only
 
 ## Notes

@@ -15,7 +15,8 @@ To improve my skills, I'm replicating the exercises using Azure.
 │       ├── lab02_reflection_agent.ipynb        # Self-Improving Content Generation Agent
 │       ├── lab03_reflexion_agent.ipynb         # Reflection Agent with External Knowledge Integration (Tavily)
 │       ├── lab03_reflexion_agent_using_bing_websearch.ipynb # Reflection Agent with Azure Bing Search
-│       └── lab03_reflexion_agent_using_langchain_tool_bing_search.ipynb # Reflection Agent with LangChain Bing Search Tools
+│       ├── lab03_reflexion_agent_using_langchain_tool_bing_search.ipynb # Reflection Agent with LangChain Bing Search Tools
+│       └── lab04_01_example_ReAct.ipynb        # ReAct Pattern Implementation with Tool Calling
 ├── .gitignore              # Git ignore rules
 └── README.md               # This file
 ```
@@ -371,6 +372,131 @@ pip install azure-cognitiveservices-search-websearch
 - **Enterprise Integration:** Native Azure ecosystem integration
 - **Simplified Codebase:** Cleaner implementation without compatibility layers
 - **Cost Efficiency:** Competitive pricing with free tier availability
+
+
+## Lab 04: Building a ReAct Agent with Tool Calling
+
+The `lab04_01_example_ReAct.ipynb` notebook demonstrates how to implement the **ReAct (Reasoning and Acting)** pattern using LangGraph and Azure OpenAI. This lab showcases how AI agents can reason about problems and take actions using external tools in an iterative process.
+
+**Note:** This implementation uses StateGraph with modern LangGraph v1.0+ patterns, demonstrating both manual ReAct execution for understanding and automated graph-based implementation for production use.
+
+### Features
+- **ReAct Pattern Implementation:** Classic Reasoning and Acting methodology where agents think, act, and observe iteratively
+- **Multi-Tool Integration:** Combines web search (Tavily) and domain-specific tools (clothing recommendation)
+- **Manual Execution Walkthrough:** Step-by-step demonstration of ReAct flow for educational purposes
+- **Automated Graph Workflow:** Production-ready implementation using LangGraph's StateGraph
+- **Tool Calling Framework:** Structured tool registration and execution with proper state management
+- **Conditional Routing:** Smart decision-making between continued tool use and workflow completion
+- **Azure OpenAI Integration:** Leverages Azure ChatOpenAI with tool binding capabilities
+- **Graph Visualization:** Visual representation of the ReAct workflow using pygraphviz
+
+### ReAct Pattern Overview
+The ReAct pattern enables AI agents to:
+1. **Reason:** Analyze the problem and determine what information is needed
+2. **Act:** Execute appropriate tools to gather required information
+3. **Observe:** Process tool results and integrate them into the reasoning process
+4. **Iterate:** Repeat the cycle until the task is complete
+
+### Tool Implementation
+The lab implements two complementary tools:
+
+#### Tool 1: Web Search (Tavily API)
+- **Purpose:** Real-time web information retrieval
+- **Use Cases:** Current weather, news, facts, and general knowledge queries
+- **Integration:** Tavily Search API for reliable web content access
+
+#### Tool 2: Clothing Recommendation
+- **Purpose:** Weather-based clothing suggestions
+- **Logic:** Keyword-based analysis of weather descriptions
+- **Recommendations:** Contextual advice for different weather conditions (snow, rain, heat, cold)
+
+### Workflow Architecture
+The lab demonstrates both manual and automated ReAct implementations:
+
+#### Manual ReAct Execution (Educational)
+**Step-by-Step Process:**
+1. **Initial Query Processing:** User question analyzed and initial response generated
+2. **Tool Execution:** Identified tools called with appropriate parameters
+3. **Result Processing:** Tool outputs integrated into agent state
+4. **Next Action Decision:** Determine if additional tools are needed
+5. **Final Response Generation:** Synthesize all information into comprehensive answer
+
+#### Automated Graph Implementation (Production)
+**Workflow Nodes:**
+- **Agent Node (`call_model`):** Processes conversation state and generates responses with tool calls
+- **Tools Node (`tool_node`):** Executes all pending tool calls and returns results
+- **Router Function (`should_continue`):** Conditional logic determining workflow continuation
+
+**State Management:**
+- **AgentState:** TypedDict with message history using `add_messages` reducer
+- **Tool Registry:** Centralized tool management with name-based lookup
+- **Message Flow:** Proper handling of HumanMessage, AIMessage, and ToolMessage types
+
+### Workflow Flow (Automated)
+1. `START` → `Agent` (process user query and determine tool needs)
+2. `Agent` → `Tools` (execute required tools if any tool calls exist)
+3. `Tools` → `Agent` (return tool results and re-evaluate)
+4. **Repeat steps 2-3** until no more tools are needed
+5. `Agent` → `END` (provide final comprehensive response)
+
+### Key Technical Implementations
+
+#### Tool Registration Pattern
+```python
+tools = [search_tool, recommend_clothing]
+tools_by_name = {tool.name: tool for tool in tools}
+```
+
+#### State Management with Reducers
+```python
+class AgentState(TypedDict):
+    messages: Annotated[Sequence[BaseMessage], add_messages]
+```
+
+#### Conditional Routing Logic
+```python
+def should_continue(state: AgentState):
+    last_message = state["messages"][-1]
+    if not last_message.tool_calls:
+        return "end"
+    else:
+        return "continue"
+```
+
+### Example Workflow Execution
+**Input:** "What's the weather like in Zurich, and what should I wear based on the temperature?"
+
+**Process:**
+1. **Reasoning:** Agent determines it needs current weather information for Zurich
+2. **Action 1:** Executes web search for Zurich weather conditions
+3. **Observation 1:** Processes weather data (temperature, conditions)
+4. **Reasoning:** Agent determines clothing recommendation is needed based on weather
+5. **Action 2:** Executes clothing recommendation tool with weather description
+6. **Observation 2:** Receives appropriate clothing suggestions
+7. **Final Response:** Synthesizes weather information with clothing recommendations
+
+### Educational Benefits
+- **ReAct Pattern Understanding:** Clear demonstration of reasoning-action cycles
+- **Manual vs. Automated:** Comparison between step-by-step execution and graph automation
+- **Tool Integration:** Best practices for multi-tool agent development
+- **State Management:** Modern LangGraph patterns for conversation state handling
+- **Conditional Logic:** Implementation of decision-making in agent workflows
+
+### Azure OpenAI Configuration
+- **Model:** `gpt-4o-mini` (configurable deployment)
+- **Temperature:** 0.7 for balanced reasoning and creativity
+- **Tool Binding:** Direct tool binding to LLM for structured tool calling
+- **Max tokens:** 1024 for comprehensive responses
+- **Request timeout:** 120 seconds
+- **Retry logic:** 3 attempts for improved reliability
+- **Top-p:** 0.95 for diverse, high-quality outputs
+
+### Production Considerations
+- **Error Handling:** Robust tool execution with proper exception management
+- **Tool Registry:** Scalable pattern for adding new tools to the agent
+- **Message History:** Complete conversation context preservation
+- **Graph Compilation:** Optimized workflow execution with LangGraph's compiled graphs
+- **Streaming Support:** Real-time response streaming for better user experience
 - **Microsoft Ecosystem:** Better integration with other Microsoft AI services
 - **Reliability:** Enterprise-grade infrastructure and uptime guarantees
 - **SafeSearch:** Built-in content filtering and safety controls
