@@ -13,9 +13,9 @@ To improve my skills, I'm replicating the exercises using Azure.
 │       ├── lab01_01_check_credentials.ipynb     # Authentication Workflow with LangGraph
 │       ├── lab01_02_chatbot.ipynb     # Q&A Chatbot with Context-Aware Responses
 │       ├── lab02_reflection_agent.ipynb        # Self-Improving Content Generation Agent
-│       ├── lab03_reflexion_agent.ipynb         # Reflection Agent with External Knowledge Integration (Tavily)
-│       ├── lab03_reflexion_agent_using_bing_websearch.ipynb # Reflection Agent with Azure Bing Search
-│       ├── lab03_reflexion_agent_using_langchain_tool_bing_search.ipynb # Reflection Agent with LangChain Bing Search Tools
+│       ├── lab03_01_reflexion_agent.ipynb      # Reflection Agent with External Knowledge Integration (Tavily)
+│       ├── lab03_02_reflexion_agent_using_bing_websearch.ipynb # Reflection Agent with Azure Bing Search
+│       ├── lab03_03_reflexion_agent_using_langchain_tool_bing_search.ipynb # Reflection Agent with LangChain Bing Search Tools
 │       └── lab04_01_example_ReAct.ipynb        # ReAct Pattern Implementation with Tool Calling
 ├── .gitignore              # Git ignore rules
 └── README.md               # This file
@@ -151,7 +151,7 @@ The agent evaluates content based on:
 
 ## Lab 03: Building a Reflection Agent with External Knowledge Integration
 
-The `lab03_reflexion_agent.ipynb` notebook demonstrates how to build an advanced reflection agent that combines self-evaluation capabilities with external knowledge retrieval. This lab represents a significant evolution in AI agent architecture, integrating real-time web search to enhance the quality and accuracy of generated responses.
+The `lab03_01_reflexion_agent.ipynb` notebook demonstrates how to build an advanced reflection agent that combines self-evaluation capabilities with external knowledge retrieval. This lab represents a significant evolution in AI agent architecture, integrating real-time web search to enhance the quality and accuracy of generated responses.
 
 **Note:** This implementation has been fully migrated from the deprecated MessageGraph to StateGraph, incorporating all the latest LangGraph v1.0+ best practices and modern state management patterns.
 
@@ -270,7 +270,7 @@ class ReviseAnswer(AnswerQuestion):
 
 ## Lab 03 Alternative: Building a Reflection Agent with Azure Bing Search Integration
 
-The `lab03_reflexion_agent_using_bing_websearch.ipynb` notebook provides an alternative implementation of Lab 03 that uses **Azure Bing Search** instead of Tavily for external knowledge retrieval. This variant demonstrates how to integrate Microsoft's Bing Search API for real-time web content access.
+The `lab03_02_reflexion_agent_using_bing_websearch.ipynb` notebook provides an alternative implementation of Lab 03 that uses **Azure Bing Search** instead of Tavily for external knowledge retrieval. This variant demonstrates how to integrate Microsoft's Bing Search API for real-time web content access.
 
 ### Key Differences from Original Lab 03
 
@@ -502,12 +502,12 @@ def should_continue(state: AgentState):
 - **SafeSearch:** Built-in content filtering and safety controls
 
 ### When to Use Which Version
-- **Use Tavily Version (`lab03_reflexion_agent.ipynb`)** when:
+- **Use Tavily Version (`lab03_01_reflexion_agent.ipynb`)** when:
   - You need specialized academic/research content
   - You prefer Tavily's curated search results
   - You're already using Tavily in other projects
 
-- **Use Bing Search Version (`lab03_reflexion_agent_using_bing_websearch.ipynb`)** when:
+- **Use Bing Search Version (`lab03_02_reflexion_agent_using_bing_websearch.ipynb`)** when:
   - You're working within the Azure ecosystem
   - You prefer Microsoft's enterprise-grade services
   - You want simplified setup and maintenance
@@ -518,7 +518,7 @@ Both implementations provide identical AI agent capabilities with different exte
 
 ## Lab 03 LangChain Alternative: Building a Reflection Agent with LangChain Bing Search Tools
 
-The `lab03_reflexion_agent_using_langchain_tool_bing_search.ipynb` notebook provides another alternative implementation of Lab 03 that uses **LangChain's Bing Search tools** (`BingSearchResults` and `BingSearchAPIWrapper`) for external knowledge retrieval. This variant demonstrates the most modern approach using LangChain's standardized tool interfaces.
+The `lab03_03_reflexion_agent_using_langchain_tool_bing_search.ipynb` notebook provides another alternative implementation of Lab 03 that uses **LangChain's Bing Search tools** (`BingSearchResults` and `BingSearchAPIWrapper`) for external knowledge retrieval. This variant demonstrates the most modern approach using LangChain's standardized tool interfaces.
 
 ### Key Differences from Other Lab 03 Variants
 
@@ -725,7 +725,7 @@ All three implementations provide identical AI agent capabilities with different
 6. Add the key to your `.env` file as `BING_SEARCH_API_KEY`
 7. The endpoint is typically: `https://api.bing.microsoft.com/`
 
-**Note:** Both Bing Search variants (`lab03_reflexion_agent_using_bing_websearch.ipynb` and `lab03_reflexion_agent_using_langchain_tool_bing_search.ipynb`) use the same `BING_SEARCH_API_KEY` environment variable, making it easy to switch between implementations.
+**Note:** Both Bing Search variants (`lab03_02_reflexion_agent_using_bing_websearch.ipynb` and `lab03_03_reflexion_agent_using_langchain_tool_bing_search.ipynb`) use the same `BING_SEARCH_API_KEY` environment variable, making it easy to switch between implementations.
 
 ## Visualization
 

@@ -15,13 +15,13 @@ Self-improving AI agent that generates content, critiques it, and refines throug
 
 ### Lab 03: Reflection Agent with External Knowledge (3 variants)
 
-**Original (`lab03_reflexion_agent.ipynb`)**
+**Original (`lab03_01_reflexion_agent.ipynb`)**
 Uses Tavily Search API for real-time web search and external knowledge integration.
 
-**Bing Search (`lab03_reflexion_agent_using_bing_websearch.ipynb`)**  
+**Bing Search (`lab03_02_reflexion_agent_using_bing_websearch.ipynb`)**  
 Azure Bing Search integration with native Microsoft ecosystem support.
 
-**LangChain Bing (`lab03_reflexion_agent_using_langchain_tool_bing_search.ipynb`)**
+**LangChain Bing (`lab03_03_reflexion_agent_using_langchain_tool_bing_search.ipynb`)**
 Uses LangChain's standardized Bing Search tools for consistent interface patterns.
 
 All Lab 03 variants implement the same AI agent with different search providers for external knowledge retrieval.
