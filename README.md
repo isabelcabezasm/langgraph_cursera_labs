@@ -75,6 +75,75 @@ The notebook uses Azure OpenAI with the following configuration:
 - Request timeout: 120 seconds
 - Top-p: 0.95 for diverse responses
 
+
+## Lab 02: Building a Reflection Agent with LangGraph
+
+The `lab02_reflection_agent.ipynb` notebook demonstrates how to build a sophisticated reflection agent using LangGraph and Azure OpenAI. This lab showcases advanced AI capabilities where the agent can evaluate and improve its own outputs through iterative reflection cycles.
+
+**Note:** This implementation uses StateGraph instead of MessageGraph, which was deprecated in LangGraph version 1.0.0. All code has been updated to use the current best practices.
+
+### Features
+- **Self-improving AI system:** Agent generates content, critiques it, and refines through multiple iterations
+- **Reflection-based workflow:** Implements a dual-system approach (quick generation + thoughtful reflection)
+- **LinkedIn content generation:** Specialized for creating professional LinkedIn posts with optimal engagement
+- **State management:** Uses TypedDict with StateGraph for robust conversation state handling
+- **Azure OpenAI integration:** Leverages Azure ChatOpenAI for intelligent content generation and critique
+- **Conditional routing:** Smart workflow control based on iteration count and quality assessment
+- **Graph visualization:** Visual representation of the reflection workflow using pygraphviz
+
+### Workflow Architecture
+The reflection agent implements a sophisticated workflow with the following components:
+
+#### Workflow Nodes
+- **Generation Node:** Creates initial LinkedIn post content based on user requirements
+- **Reflection Node:** Critically evaluates generated content and provides detailed feedback
+- **Router Function:** Determines whether to continue reflection cycles or end the workflow
+
+#### Reflection Process
+1. **Initial Generation:** Quick, instinctive response to user prompt
+2. **Critical Evaluation:** Professional content strategist assessment of quality, engagement potential, and LinkedIn best practices
+3. **Iterative Refinement:** Multiple cycles of improvement based on structured feedback
+4. **Quality Control:** Automatic termination after optimal number of iterations (typically 3 cycles)
+
+### Workflow Flow
+1. `START` → `Generate` (create initial LinkedIn post)
+2. `Generate` → `Reflect` (critique and provide improvement suggestions)
+3. `Reflect` → `Generate` (refine content based on feedback)
+4. **Repeat steps 2-3** until quality threshold is met or maximum iterations reached
+5. `Generate` → `END` (finalize optimized content)
+
+### Key Improvements from MessageGraph to StateGraph
+- **Enhanced State Management:** More robust state handling with TypedDict structure
+- **Better Type Safety:** Improved type checking and state validation
+- **Cleaner API:** Simplified node function signatures and state updates
+- **Future-Proof:** Uses current LangGraph best practices and stable APIs
+
+### Reflection Criteria
+The agent evaluates content based on:
+- **Professional Quality:** Alignment with LinkedIn standards and best practices
+- **Engagement Potential:** Likelihood to generate likes, comments, and shares
+- **Structure & Clarity:** Readability, formatting, and message clarity
+- **Industry Relevance:** Appropriateness for target audience and current trends
+- **Call-to-Action Effectiveness:** Strength of engagement prompts and takeaways
+
+### Example Usage
+**Input:** "Write a LinkedIn post on getting a software developer job at IBM under 160 characters"
+
+**Process:**
+1. **Initial Generation:** Basic post creation
+2. **First Reflection:** Critique focusing on engagement and professionalism
+3. **Second Generation:** Refined post incorporating feedback
+4. **Final Reflection:** Polish and optimize for maximum impact
+5. **Final Output:** Professional, engaging LinkedIn post ready for publication
+
+### Azure OpenAI Configuration
+- **Model:** `gpt-4o-mini` (configurable deployment)
+- **Temperature:** 0.7 for balanced creativity and consistency
+- **Max tokens:** 1024 for comprehensive responses
+- **Request timeout:** 120 seconds
+- **Top-p:** 0.95 for diverse, high-quality outputs
+
+
 ## Prerequisites
 
 - Python 3.11 or newer
