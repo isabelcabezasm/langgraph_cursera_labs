@@ -21,7 +21,9 @@ pip install \
     pydantic \
     databricks-sdk \
     databricks-cli \
-    python-dotenv
+    python-dotenv \
+    langchain_community==0.3.21  \
+    pygraphviz==1.14
 
 # Install Jupyter kernel so notebooks in this workspace can run
 if command -v python3 >/dev/null 2>&1; then
