@@ -16,11 +16,12 @@ To improve my skills, I'm replicating the exercises using Azure.
 │       ├── lab03_01_reflexion_agent.ipynb      # Reflection Agent with External Knowledge Integration (Tavily)
 │       ├── lab03_02_reflexion_agent_using_bing_websearch.ipynb # Reflection Agent with Azure Bing Search
 │       ├── lab03_03_reflexion_agent_using_langchain_tool_bing_search.ipynb # Reflection Agent with LangChain Bing Search Tools
-│       └── lab04_01_example_ReAct.ipynb        # ReAct Pattern Implementation with Tool Calling
+│       ├── lab04_01_example_ReAct.ipynb        # ReAct Pattern Implementation with Tool Calling
+│       ├── lab04_02_exercise_01_ReAct_calculator.ipynb # Exercise: Build a Calculator Tool
+│       └── lab04_03_exercise_02_ReAct_news_summary.ipynb # Exercise: Create a News Summary Tool
 ├── .gitignore              # Git ignore rules
 └── README.md               # This file
 ```
-
 ## Lab 01.1: Authentication Workflow
 
 The `lab01_01_check_credentials.ipynb` notebook demonstrates how to build a stateful authentication workflow using LangGraph. The workflow includes:
@@ -514,6 +515,68 @@ def should_continue(state: AgentState):
   - You need SafeSearch content filtering capabilities
 
 Both implementations provide identical AI agent capabilities with different external knowledge providers, allowing you to choose based on your specific requirements and infrastructure preferences.
+
+
+## Lab 04.1: Building a Calculator Tool Exercise
+
+The `lab04_02_exercise_01_ReAct_calculator.ipynb` notebook provides a hands-on exercise for building a secure mathematical calculator tool that integrates with the ReAct agent workflow. This exercise demonstrates how to create custom tools that can handle complex mathematical operations safely.
+
+### Features
+- **Safe Mathematical Evaluation:** Uses Python's AST (Abstract Syntax Tree) module instead of dangerous `eval()` for secure expression parsing
+- **Comprehensive Math Functions:** Supports basic arithmetic, trigonometry (sin, cos, tan), logarithms (log, log10), exponentials, and mathematical constants (π, e)
+- **Robust Error Handling:** Graceful handling of invalid expressions and unsupported operations
+- **Manual and Automated Execution:** Demonstrates both step-by-step manual ReAct execution and automated graph-based workflow
+- **Tool Integration:** Seamless integration with LangGraph's StateGraph architecture
+
+### Mathematical Capabilities
+- **Basic Operations:** Addition, subtraction, multiplication, division, exponentiation
+- **Advanced Functions:** sqrt, sin, cos, tan, log, log10, exp, abs
+- **Constants:** π (pi), e (Euler's number)
+- **Complex Expressions:** Supports nested operations like "15% of 250 plus the square root of 144"
+
+### Example Usage
+**Input:** "What's 15% of 250 plus the square root of 144?"
+
+**Process:**
+1. **Reasoning:** Agent identifies need for mathematical calculation
+2. **Action:** Calls calculator_tool with expression "0.15 * 250 + sqrt(144)"
+3. **Observation:** Receives result "49.5"
+4. **Response:** Provides formatted answer with explanation
+
+
+## Lab 04.2: Building a News Summarization Tool Exercise
+
+The `lab04_03_exercise_02_ReAct_news_summary.ipynb` notebook provides a hands-on exercise for creating a news summarization tool that works with web search functionality. This exercise demonstrates how to build tools that process and format external data for enhanced AI responses.
+
+### Features
+- **Multi-Format Processing:** Handles both JSON-formatted search results and plain text content
+- **Intelligent Content Extraction:** Automatically extracts titles, URLs, and key information from news articles
+- **Professional Formatting:** Creates visually appealing summaries with emojis and structured layout
+- **Article Limitation:** Processes top 3 articles for focused, digestible summaries
+- **Error Handling:** Robust error management for malformed data and processing failures
+- **Search Integration:** Works seamlessly with Tavily Search API for real-time news retrieval
+
+### Summary Format
+The tool generates professional summaries with:
+```
+📊 **NEWS SUMMARY**
+==================================================
+
+📰 **Article Title**
+🔗 URL Link
+📝 **Summary:** Key points extracted from article content...
+```
+
+### Example Usage
+**Input:** "Find recent AI news and summarize the top 3 articles"
+
+**Process:**
+1. **Reasoning:** Agent identifies need for current news information
+2. **Action 1:** Executes search_tool with query "recent AI news"
+3. **Observation 1:** Receives search results with multiple articles
+4. **Action 2:** Calls news_summarizer_tool with search results
+5. **Observation 2:** Receives formatted summary of top 3 articles
+6. **Response:** Provides comprehensive news summary with titles, links, and key points
 
 
 ## Lab 03 LangChain Alternative: Building a Reflection Agent with LangChain Bing Search Tools

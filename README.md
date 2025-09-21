@@ -29,6 +29,15 @@ All Lab 03 variants implement the same AI agent with different search providers 
 ### Lab 04: ReAct Agent with Tool Calling
 Implementation of the ReAct (Reasoning and Acting) pattern with multi-tool integration. Demonstrates both manual step-by-step execution and automated graph-based workflow using Tavily search and clothing recommendation tools.
 
+### Lab 04.1: Calculator Tool Exercise
+Hands-on exercise building a secure mathematical calculator tool for the ReAct agent. Implements safe expression evaluation using AST parsing to handle complex mathematical operations including trigonometric functions, logarithms, and constants like π and e.
+
+**Example Queries:** "What's 15% of 250 plus the square root of 144?" or "Calculate sin(π/2) + log10(100)"
+
+### Lab 04.2: News Summarization Tool Exercise  
+Hands-on exercise creating a news summarization tool that works with web search functionality. Builds upon the ReAct pattern to fetch and intelligently summarize recent news articles with proper formatting and key information extraction.
+**Example Queries:** "Find recent AI news and summarize the top 3 articles" or "Search for recent technology developments and give me a summary"
+
 ## Quick Setup
 
 1. Clone repository and open in VS Code dev container
