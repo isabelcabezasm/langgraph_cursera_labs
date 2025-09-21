@@ -274,10 +274,26 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
-ignore = ["E501"]
+ignore = [
+    "E501",  # Line too long
+    "D",     # All docstring rules (pydocstyle)
+    "D100",  # Missing docstring in public module (explicitly for clarity)
+]
 
 [tool.mypy]
 python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
+
+[tool.pylint.messages_control]
+disable = [
+    "missing-module-docstring",  # C0114: Missing module docstring
+    "missing-class-docstring",   # C0115: Missing class docstring (optional)
+    "missing-function-docstring", # C0116: Missing function docstring (optional)
+]
+
+[dependency-groups]
+dev = [
+    "pylint>=3.3.8",
+]
