@@ -24,6 +24,17 @@ Hands-on exercise building a secure mathematical calculator tool for the ReAct a
 
 **Example Queries:** "What's 15% of 250 plus the square root of 144?" or "Calculate sin(π/2) + log10(100)"
 
+### Lab 05: Document Chat Application (DocChat)
+Advanced document analysis and chat application using LangGraph multi-agent workflows. Features intelligent document processing, hybrid retrieval, and a multi-agent system for comprehensive document Q&A with verification and relevance checking.
+
+**Key Features:**
+- **Multi-Agent Architecture:** Research, verification, and relevance checking agents
+- **Hybrid Retrieval:** BM25 + ChromaDB vector search for optimal document retrieval
+- **Document Processing:** Support for PDF, DOCX, TXT, and other formats using Docling
+- **Gradio Web Interface:** Interactive chat interface with file upload capabilities
+- **Azure AI Integration:** Fully migrated from IBM WatsonX to Azure AI services
+- **Modern Package Management:** Uses `uv` for fast, reliable dependency management
+
 ### Lab 04.2: News Summarization Tool Exercise  
 Hands-on exercise creating a news summarization tool that works with web search functionality. Builds upon the ReAct pattern to fetch and intelligently summarize recent news articles with proper formatting and key information extraction.
 **Example Queries:** "Find recent AI news and summarize the top 3 articles" or "Search for recent technology developments and give me a summary"
@@ -38,12 +49,17 @@ Hands-on exercise creating a news summarization tool that works with web search 
    OPENAI_API_VERSION=2024-12-01-preview
    TAVILY_API_KEY=your_tavily_key        # For original Lab 03
    ```
-3. Run notebooks in `src/notebooks/`
+3. Run notebooks in `src/notebooks/` or launch DocChat with `cd src/lab_05/docchat && uv run python app.py`
 
 ## API Keys Required
 
 - **Azure OpenAI**: All labs except 01.1
-   - **Tavily Search**: Lab 03 and Lab 04
+- **Tavily Search**: Lab 03 and Lab 04
+- **Azure AI Inference**: Lab 05 DocChat application
+
+## Notes
 
 - All labs updated to use StateGraph (LangGraph v1.0+)
 - Dev container includes all required dependencies
+- Lab 05 includes production-ready document chat application with multi-agent architecture
+- Lab 05 uses `uv` package manager for modern Python dependency management

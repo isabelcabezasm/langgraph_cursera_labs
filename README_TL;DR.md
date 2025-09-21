@@ -16,7 +16,9 @@ To improve my skills, I'm replicating the exercises using Azure.
 │       ├── lab03_01_reflexion_agent.ipynb      # Reflection Agent with External Knowledge Integration (Tavily)
 │       ├── lab04_01_example_ReAct.ipynb        # ReAct Pattern Implementation with Tool Calling
 │       ├── lab04_02_exercise_01_ReAct_calculator.ipynb # Exercise: Build a Calculator Tool
-│       └── lab04_03_exercise_02_ReAct_news_summary.ipynb # Exercise: Create a News Summary Tool
+│       ├── lab04_03_exercise_02_ReAct_news_summary.ipynb # Exercise: Create a News Summary Tool
+│       └── lab_05/            # Advanced document chat application
+│           └── docchat/       # Multi-agent document analysis system
 ├── .gitignore              # Git ignore rules
 └── README.md               # This file
 ```
@@ -454,12 +456,225 @@ The tool generates professional summaries with:
 3. **Observation 1:** Receives search results with multiple articles
 4. **Action 2:** Calls news_summarizer_tool with search results
 5. **Observation 2:** Receives formatted summary of top 3 articles
+5. **Observation 2:** Receives formatted summary of top 3 articles
 6. **Response:** Provides comprehensive news summary with titles, links, and key points
+
+
+## Lab 05: DocChat - Advanced Document Analysis Application
+
+The `src/lab_05/docchat/` directory contains a production-ready document chat application that represents the culmination of LangGraph multi-agent system development. This advanced project demonstrates enterprise-level implementation of document processing, retrieval, and AI-powered question answering.
+
+### Architecture Overview
+
+DocChat implements a sophisticated multi-agent workflow using LangGraph's StateGraph architecture, featuring three specialized agents working in coordination:
+
+#### Agent Architecture
+- **Relevance Checker Agent**: Determines if uploaded documents contain information relevant to user queries
+- **Research Agent**: Performs intelligent document retrieval and generates comprehensive draft answers
+- **Verification Agent**: Validates and fact-checks research findings for accuracy and completeness
+
+#### Workflow Components
+- **Document Processor**: Advanced file handling using Docling for PDF, DOCX, TXT, and other formats
+- **Hybrid Retriever**: Combines BM25 keyword search with ChromaDB vector embeddings for optimal retrieval
+- **State Management**: Robust TypedDict-based workflow state with proper error handling
+- **Web Interface**: Professional Gradio-based chat interface with file upload capabilities
+
+### Key Features
+
+#### Multi-Agent Workflow
+- **StateGraph Implementation**: Modern LangGraph v1.0+ patterns with conditional routing
+- **Agent Coordination**: Intelligent workflow control with decision points for re-research and verification
+- **Error Recovery**: Graceful handling of agent failures and malformed responses
+- **Iteration Control**: Configurable limits to prevent infinite loops while ensuring thorough analysis
+
+#### Document Processing Capabilities
+- **Format Support**: PDF, DOCX, TXT, HTML, and other document formats
+- **Intelligent Chunking**: Semantic text splitting optimized for retrieval accuracy
+- **Metadata Extraction**: Automatic extraction of document structure and context
+- **Caching System**: Efficient document processing with intelligent caching mechanisms
+
+#### Hybrid Retrieval System
+- **Vector Search**: ChromaDB with Azure OpenAI embeddings (text-embedding-ada-002)
+- **Keyword Search**: BM25 algorithm for exact term matching and traditional IR
+- **Ensemble Retrieval**: Intelligent combination of both approaches for optimal results
+- **Relevance Scoring**: Advanced scoring mechanisms for result ranking and filtering
+
+#### Azure AI Integration
+- **Azure AI Inference**: Complete migration from IBM WatsonX to Azure AI services
+- **Azure OpenAI Embeddings**: High-quality text embeddings for semantic search
+- **Configurable Models**: Support for various Azure AI models with temperature and token controls
+- **Authentication**: Secure Azure credential management and API key handling
+
+#### Modern Development Tools
+- **UV Package Manager**: Fast, reliable Python package and project management
+- **Dependency Lock Files**: Reproducible builds with `uv.lock` for consistent environments
+- **Virtual Environment Management**: Automatic virtual environment creation and activation
+- **Fast Installation**: Significantly faster dependency resolution and installation compared to pip
+
+### Technical Implementation
+
+#### Workflow State Management
+```python
+class AgentState(TypedDict):
+    question: str
+    documents: List[Document]
+    draft_answer: str
+    verification_report: str
+    is_relevant: bool
+    retriever: EnsembleRetriever
+```
+
+#### Multi-Agent Coordination
+1. **Relevance Check**: Documents analyzed for query relevance before processing
+2. **Research Phase**: Hybrid retrieval generates comprehensive draft answers
+3. **Verification Phase**: Draft answers validated and enhanced with fact-checking
+4. **Decision Logic**: Conditional routing for re-research or completion based on quality metrics
+
+#### Agent Specializations
+
+**Relevance Checker Agent:**
+- **Purpose**: Efficient pre-filtering of irrelevant documents
+- **Model Configuration**: Temperature 0.0 for consistent decision-making
+- **Response Format**: Boolean relevance determination with reasoning
+- **Optimization**: Prevents unnecessary processing of irrelevant content
+
+**Research Agent:**
+- **Purpose**: Comprehensive document analysis and answer generation
+- **Model Configuration**: Temperature 0.3, max_tokens 300 for balanced creativity
+- **Retrieval Strategy**: Hybrid search with configurable result limits
+- **Output Format**: Structured draft answers with source attribution
+
+**Verification Agent:**
+- **Purpose**: Quality assurance and fact validation
+- **Model Configuration**: Temperature 0.0, max_tokens 200 for precision
+- **Validation Criteria**: Accuracy, completeness, and source verification
+- **Enhancement**: Suggestions for answer improvement and re-research triggers
+
+### Deployment and Usage
+
+#### Environment Configuration
+```env
+# Azure AI Services
+AZURE_OPENAI_ENDPOINT=your_azure_openai_endpoint
+AZURE_OPENAI_API_KEY=your_azure_openai_api_key
+AZURE_OPENAI_DEPLOYMENT_NAME=your_chat_deployment_name
+AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT_NAME=text-embedding-ada-002
+AZURE_OPENAI_API_VERSION=2024-02-01
+```
+
+#### Web Interface Features
+- **File Upload**: Drag-and-drop document upload with format validation
+- **Real-time Chat**: Interactive conversation interface with typing indicators
+- **Processing Status**: Visual feedback during document processing and analysis
+- **Example Queries**: Pre-configured examples for common use cases
+- **Response Formatting**: Professional output with source citations and confidence indicators
+
+#### Example Use Cases
+
+**Google Environmental Report Analysis:**
+- **Query**: "Retrieve the data center PUE efficiency values in Singapore 2nd facility in 2019 and 2022"
+- **Process**: Multi-agent workflow extracts specific metrics with verification
+- **Output**: Precise numerical data with source page references
+
+**Technical Document Analysis:**
+- **Query**: "Summarize DeepSeek-R1 model's performance evaluation on coding tasks"
+- **Process**: Research agent analyzes technical content, verification ensures accuracy
+- **Output**: Comprehensive performance summary with methodology validation
+
+### Advanced Capabilities
+
+#### Production-Ready Features
+- **Comprehensive Testing**: 47+ test cases covering all agents and integration scenarios
+- **Error Handling**: Robust exception management with graceful degradation
+- **Performance Optimization**: Efficient caching and retrieval strategies
+- **Scalability**: Modular architecture supporting additional agents and capabilities
+- **Monitoring**: Detailed logging and performance metrics
+
+#### SQLite Compatibility
+- **ChromaDB Integration**: Automatic SQLite version upgrade for compatibility
+- **Version Management**: Seamless handling of SQLite 3.34.1 → 3.46.1 upgrade
+- **Fallback Strategy**: Graceful degradation when pysqlite3 unavailable
+
+#### Development Tools
+- **Testing Framework**: Pytest-based comprehensive test suite
+- **Code Quality**: Black, isort, ruff, and mypy for code standards
+- **Documentation**: Extensive inline documentation and type hints
+- **Migration Guide**: Complete Azure migration documentation
+
+### Installation and Setup
+
+#### Quick Start
+```bash
+# Navigate to docchat directory
+cd src/lab_05/docchat/
+
+# Install uv if not already installed
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install dependencies using uv
+uv sync
+
+# Configure environment
+cp template.env .env
+# Edit .env with your Azure credentials
+
+# Launch application
+uv run python app.py
+```
+
+#### Development Setup
+```bash
+# Install development dependencies
+uv sync --dev
+
+# Run tests
+uv run pytest integration_tests/ -v
+
+# Code formatting
+uv run black .
+uv run isort .
+uv run ruff check .
+```
+
+#### Alternative Setup (using pip)
+```bash
+# If you prefer using pip instead of uv
+cd src/lab_05/docchat/
+pip install -r requirements.txt
+python app.py
+```
+
+### Architecture Benefits
+
+#### Enterprise Readiness
+- **Modular Design**: Clear separation of concerns with pluggable components
+- **Scalable Architecture**: Support for additional agents and document types
+- **Production Deployment**: Docker support and containerization ready
+- **Security**: Secure credential management and input validation
+
+#### Educational Value
+- **Complete Workflow**: End-to-end multi-agent system implementation
+- **Best Practices**: Modern LangGraph patterns and state management
+- **Real-world Application**: Production-quality code with comprehensive testing
+- **Migration Example**: Demonstrates platform migration strategies (IBM → Azure)
+- **Modern Tooling**: Showcases contemporary Python development practices with `uv`
+
+#### Technical Innovation
+- **Hybrid Retrieval**: Novel combination of vector and keyword search
+- **Agent Coordination**: Advanced multi-agent workflow patterns
+- **State Management**: Sophisticated state handling with error recovery
+- **Interface Design**: Professional web interface with excellent UX
+
+DocChat represents the culmination of the LangGraph learning journey, demonstrating how multiple concepts from previous labs combine into a cohesive, production-ready application suitable for enterprise document analysis and knowledge extraction workflows.
+
+
+## Prerequisites
 
 ## Prerequisites
 
 - Python 3.11 or newer
-- Jupyter Notebook or JupyterLab environment
+- Jupyter Notebook or JupyterLab environment  
+- `uv` package manager (for Lab 05) - install with `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - Required packages (installed automatically in the dev container):
     - `langgraph` (version 1.0+)
     - `langchain-openai` (for Azure OpenAI integration)
@@ -471,6 +686,10 @@ The tool generates professional summaries with:
     - `pygraphviz` (for advanced graph visualization)
     - `pydantic` (for structured data validation)
     - `tavily-python` (for external knowledge retrieval in Lab 03 and 04)
+    - `gradio` (for Lab 05 web interface)
+    - `chromadb` (for Lab 05 vector database)
+    - `docling` (for Lab 05 document processing)
+    - `azure-ai-inference` (for Lab 05 Azure AI integration)
 
 ## Setup
 
@@ -486,7 +705,8 @@ The tool generates professional summaries with:
      # Tavily Search API (required for original Lab 03)
      TAVILY_API_KEY=your_tavily_api_key_here
      ```
-4. Open and run the notebooks in the `src/notebooks/` directory.
+4. Open and run the notebooks in the `src/notebooks/` directory
+5. For Lab 05 DocChat: Navigate to `src/lab_05/docchat/`, run `uv sync` then `uv run python app.py`
 
 ### API Key Setup Guide
 
