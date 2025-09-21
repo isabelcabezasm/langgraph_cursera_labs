@@ -1,0 +1,82 @@
+{
+  "name": "DocChat Project",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.pylint",
+        "ms-python.flake8",
+        "ms-python.black-formatter",
+        "ms-python.isort",
+        "ms-toolsai.jupyter",
+        "charliermarsh.ruff",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.vscode-json"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.formatting.provider": "black",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": false,
+        "python.linting.flake8Enabled": true,
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.organizeImports": "explicit"
+        },
+        "files.exclude": {
+          "**/__pycache__": true,
+          "**/.pytest_cache": true,
+          "**/venv": true,
+          "**/.env": false
+        }
+      },
+      "launch": {
+        "version": "0.2.0",
+        "configurations": [
+          {
+            "name": "Python: DocChat App",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/app.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+              "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": []
+          },
+          {
+            "name": "Python: Run Tests",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "args": [
+              "integration_tests/",
+              "-v"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "forwardPorts": [
+    7860,
+    8000
+  ],
+  "postCreateCommand": ".devcontainer/quickstart.sh",
+  "postStartCommand": "echo '🔄 DevContainer ready! Run: uv run python app.py'",
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=${localWorkspaceFolder}/.env,target=/workspaces/cursera_labs/src/lab_05/docchat/.env,type=bind,consistency=cached"
+  ]
+}

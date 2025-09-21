@@ -41,3 +41,5 @@ ENV/
 # OS files
 .DS_Store
 Thumbs.db
+
+src/lab_05/docchat/.gradio/certificate.pem

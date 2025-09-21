@@ -1,0 +1,35 @@
+__pycache__/
+*.pyc
+.env
+chroma_db/
+venv/
+app.log
+document_cache/
+
+# UV package manager
+.uv/
+uv.lock
+
+# Development containers
+.devcontainer/.vscode/
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Jupyter
+.jupyter/
+*.ipynb_checkpoints
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
