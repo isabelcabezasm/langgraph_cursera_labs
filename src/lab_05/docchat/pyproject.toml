@@ -261,15 +261,15 @@ packages = ["agents", "config", "document_processor", "retriever", "utils"]
 include = ["app.py"]
 
 [tool.black]
-line-length = 88
+line-length = 120
 target-version = ['py311']
 
 [tool.isort]
 profile = "black"
-line_length = 88
+line_length = 120
 
 [tool.ruff]
-line-length = 88
+line-length = 120
 target-version = "py311"
 
 [tool.ruff.lint]
@@ -279,6 +279,10 @@ ignore = [
     "D",     # All docstring rules (pydocstyle)
     "D100",  # Missing docstring in public module (explicitly for clarity)
 ]
+
+[tool.flake8]
+max-line-length = 120
+ignore = ["E501", "D"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -292,6 +296,9 @@ disable = [
     "missing-class-docstring",   # C0115: Missing class docstring (optional)
     "missing-function-docstring", # C0116: Missing function docstring (optional)
 ]
+
+[tool.pylint.format]
+max-line-length = 120
 
 [dependency-groups]
 dev = [
