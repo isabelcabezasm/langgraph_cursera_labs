@@ -19,8 +19,8 @@ from document_processor.file_handler import DocumentProcessor
 from retriever.builder import RetrieverBuilder
 from utils.logging import logger
 
-# 1) Define some example data
-#    (i.e., question + paths to documents relevant to that question).
+# 1) Define some example data (i.e., question + paths to documents relevant to
+#    that question).
 EXAMPLES = {
     "Google 2024 Environmental Report": {
         "question": "Retrieve the data center PUE efficiency values in Singapore 2nd facility in 2019 and 2022. Also retrieve regional average CFE in Asia pacific in 2023",
@@ -41,15 +41,13 @@ def main():
     # Define custom CSS for styling
     css = """
     .title {
-        font-size: 1.5em !important; 
-        text-align: center !important;
-        color: #FFD700; 
+        font-size: 1.5em !important; text-align: center !important; color:
+        #FFD700;
     }
 
     .subtitle {
-        font-size: 1em !important; 
-        text-align: center !important;
-        color: #FFD700; 
+        font-size: 1em !important; text-align: center !important; color:
+        #FFD700;
     }
 
     .text {
@@ -59,22 +57,19 @@ def main():
 
     js = """
     function createGradioAnimation() {
-        var container = document.createElement('div');
-        container.id = 'gradio-animation';
-        container.style.fontSize = '2em';
-        container.style.fontWeight = 'bold';
-        container.style.textAlign = 'center';
-        container.style.marginBottom = '20px';
-        container.style.color = '#eba93f';
+        var container = document.createElement('div'); container.id =
+        'gradio-animation'; container.style.fontSize = '2em';
+        container.style.fontWeight = 'bold'; container.style.textAlign =
+        'center'; container.style.marginBottom = '20px'; container.style.color =
+        '#eba93f';
 
-        var text = 'Welcome to DocChat 🐥!';
-        for (var i = 0; i < text.length; i++) {
+        var text = 'Welcome to DocChat 🐥!'; for (var i = 0; i < text.length;
+        i++) {
             (function(i){
                 setTimeout(function(){
                     var letter = document.createElement('span');
-                    letter.style.opacity = '0';
-                    letter.style.transition = 'opacity 0.1s';
-                    letter.innerText = text[i];
+                    letter.style.opacity = '0'; letter.style.transition =
+                    'opacity 0.1s'; letter.innerText = text[i];
 
                     container.appendChild(letter);
 
@@ -142,9 +137,8 @@ def main():
         # 4) Helper function to load example into the UI
         def load_example(example_key: str):
             """
-            Given a key like 'Example 1',
-            read the relevant docs from disk and return
-            them as file-like objects, plus the example question.
+            Given a key like 'Example 1', read the relevant docs from disk and
+            return them as file-like objects, plus the example question.
             """
             if not example_key or example_key not in EXAMPLES:
                 return [], ""  # blank if not found
@@ -153,8 +147,8 @@ def main():
             question = ex_data["question"]
             file_paths = ex_data["file_paths"]
 
-            # Prepare the file list to return. We read them from disk to
-            # give Gradio something it can handle as "uploaded" files.
+            # Prepare the file list to return. We read them from disk to give
+            # Gradio something it can handle as "uploaded" files.
             loaded_files = []
             for path in file_paths:
                 if os.path.exists(path):

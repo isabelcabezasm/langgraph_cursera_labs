@@ -3,6 +3,7 @@
 Comprehensive test runner for all agent integration tests.
 """
 
+import importlib.util
 import os
 import sys
 import time
@@ -36,27 +37,40 @@ def check_prerequisites():
         return False
 
     print("✅ Environment variables check passed!")
-
-    # Check if required modules can be imported
+    # Check if required modules can be imported (without importing unused symbols)
     try:
-        from agents.relevance_checker import RelevanceChecker
-        from agents.research_agent import ResearchAgent
-        from agents.verification_agent import VerificationAgent
-        from retriever.builder import RetrieverBuilder
+        modules = [
+            "agents.relevance_checker",
+            "agents.research_agent",
+            "agents.verification_agent",
+            "retriever.builder",
+        ]
+
+        missing = [m for m in modules if importlib.util.find_spec(m) is None]
+        if missing:
+            print(f"❌ Missing required modules: {', '.join(missing)}")
+            return False
 
         print("✅ Agent modules and retriever import check passed!")
-    except ImportError as e:
-        print(f"❌ Failed to import agent modules or retriever: {e}")
+    except Exception as e:
+        print(f"❌ Failed to verify agent modules or retriever: {e}")
+        return False
         return False
 
     # Check if Azure AI packages are available
     try:
-        from azure.ai.inference import ChatCompletionsClient
-        from azure.core.credentials import AzureKeyCredential
+        missing = [
+            m
+            for m in ("azure.ai.inference", "azure.core.credentials")
+            if importlib.util.find_spec(m) is None
+        ]
+        if missing:
+            print(f"❌ Azure AI packages not available: {', '.join(missing)}")
+            return False
 
         print("✅ Azure AI packages check passed!")
-    except ImportError as e:
-        print(f"❌ Azure AI packages not available: {e}")
+    except Exception as e:
+        print(f"❌ Azure AI package check failed: {e}")
         return False
 
     print("🎉 All prerequisites met!")

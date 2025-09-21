@@ -1,17 +1,18 @@
+import logging
+import os
+
 from azure.ai.inference import ChatCompletionsClient
 from azure.ai.inference.models import SystemMessage, UserMessage
 from azure.core.credentials import AzureKeyCredential
-from config.settings import settings
-import re
-import logging
-import os
 
 logger = logging.getLogger(__name__)
 
 # Azure AI setup - these should be configured in your environment variables or settings
 azure_base_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
 azure_api_key = os.getenv("AZURE_OPENAI_API_KEY")
-azure_deployment_name = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME") # use Gpt4 or gpt4-turbo here, instead of ibm/granite-3-8b-instruct
+azure_deployment_name = os.getenv(
+    "AZURE_OPENAI_DEPLOYMENT_NAME"
+)  # use Gpt4 or gpt4-turbo here, instead of ibm/granite-3-8b-instruct
 
 # Build full endpoint URL for Azure AI Inference
 azure_endpoint = f"{azure_base_endpoint}openai/deployments/{azure_deployment_name}"
@@ -20,15 +21,17 @@ azure_endpoint = f"{azure_base_endpoint}openai/deployments/{azure_deployment_nam
 client = None
 if azure_base_endpoint and azure_api_key and azure_deployment_name:
     client = ChatCompletionsClient(
-        endpoint=azure_endpoint,
-        credential=AzureKeyCredential(azure_api_key)
+        endpoint=azure_endpoint, credential=AzureKeyCredential(azure_api_key)
     )
+
 
 class RelevanceChecker:
     def __init__(self):
         # Initialize the Azure AI client
         if client is None:
-            raise ValueError("Azure AI client not initialized. Please check your environment variables.")
+            raise ValueError(
+                "Azure AI client not initialized. Please check your environment variables."
+            )
         self.client = client
         self.deployment_name = azure_deployment_name
 
@@ -41,12 +44,16 @@ class RelevanceChecker:
         Returns: "CAN_ANSWER", "PARTIAL", or "NO_MATCH".
         """
 
-        logger.debug(f"RelevanceChecker.check called with question='{question}' and k={k}")
+        logger.debug(
+            f"RelevanceChecker.check called with question='{question}' and k={k}"
+        )
 
         # Retrieve doc chunks from the ensemble retriever
         top_docs = retriever.invoke(question)
         if not top_docs:
-            logger.debug("No documents returned from retriever.invoke(). Classifying as NO_MATCH.")
+            logger.debug(
+                "No documents returned from retriever.invoke(). Classifying as NO_MATCH."
+            )
             return "NO_MATCH"
 
         # Combine the top k chunk texts into one string
@@ -76,12 +83,14 @@ class RelevanceChecker:
         try:
             response = self.client.complete(
                 messages=[
-                    SystemMessage(content="You are an AI relevance checker between a user's question and provided document content."),
-                    UserMessage(content=prompt)
+                    SystemMessage(
+                        content="You are an AI relevance checker between a user's question and provided document content."
+                    ),
+                    UserMessage(content=prompt),
                 ],
                 model=self.deployment_name,
                 temperature=0,
-                max_tokens=10
+                max_tokens=10,
             )
         except Exception as e:
             logger.error(f"Error during model inference: {e}")

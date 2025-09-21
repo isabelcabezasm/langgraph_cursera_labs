@@ -1,0 +1,191 @@
+#!/usr/bin/env bash
+#
+# Linting script using ruff for DocChat project
+# Usage: ./bin/lint [options] [paths...]
+#
+
+set -e
+
+# Color output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Default settings
+PATHS="${@:-.}"  # Use provided paths or current directory
+FIX_MODE=false
+CHECK_ONLY=false
+VERBOSE=false
+
+# Help function
+show_help() {
+    cat << EOF
+DocChat Linting Script
+
+Usage: ./bin/lint [options] [paths...]
+
+Options:
+    -h, --help      Show this help message
+    -f, --fix       Automatically fix issues where possible
+    -c, --check     Check only, exit with error code if issues found
+    -v, --verbose   Verbose output
+    --format        Run ruff format (code formatting)
+    --all           Run all checks (lint + format)
+
+Examples:
+    ./bin/lint                      # Lint current directory
+    ./bin/lint --fix               # Lint and auto-fix issues
+    ./bin/lint --format             # Format code only
+    ./bin/lint --all               # Lint and format
+    ./bin/lint app.py config/      # Lint specific files/directories
+    ./bin/lint --check             # Check only for CI/CD
+
+EOF
+}
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            show_help
+            exit 0
+            ;;
+        -f|--fix)
+            FIX_MODE=true
+            shift
+            ;;
+        -c|--check)
+            CHECK_ONLY=true
+            shift
+            ;;
+        -v|--verbose)
+            VERBOSE=true
+            shift
+            ;;
+        --format)
+            FORMAT_ONLY=true
+            shift
+            ;;
+        --all)
+            RUN_ALL=true
+            shift
+            ;;
+        -*)
+            echo -e "${RED}Error: Unknown option $1${NC}" >&2
+            show_help
+            exit 1
+            ;;
+        *)
+            # Remaining arguments are paths
+            break
+            ;;
+    esac
+done
+
+# Set paths if provided
+if [[ "$RUN_ALL" == "true" ]]; then
+    # For --all, use current directory to include everything
+    PATHS="."
+elif [[ $# -gt 0 ]]; then
+    PATHS="$@"
+else
+    # Default to current directory if no paths specified
+    PATHS="."
+fi
+
+echo -e "${BLUE}🔍 DocChat Code Linting${NC}"
+echo -e "${BLUE}========================${NC}"
+
+# Check if uv is available
+if ! command -v uv &> /dev/null; then
+    echo -e "${RED}Error: uv is not installed or not in PATH${NC}"
+    exit 1
+fi
+
+# Function to run ruff with proper error handling
+run_ruff() {
+    local cmd="$1"
+    local description="$2"
+    
+    echo -e "\n${YELLOW}$description${NC}"
+    echo "Command: uv run $cmd"
+    
+    if [[ "$VERBOSE" == "true" ]]; then
+        uv run $cmd
+    else
+        uv run $cmd 2>/dev/null || {
+            echo -e "${RED}❌ $description failed${NC}"
+            return 1
+        }
+    fi
+    
+    echo -e "${GREEN}✅ $description completed${NC}"
+    return 0
+}
+
+# Main linting logic
+exit_code=0
+
+if [[ "$FORMAT_ONLY" == "true" ]]; then
+    # Format only
+    if ! run_ruff "ruff format $PATHS" "Code formatting"; then
+        exit_code=1
+    fi
+elif [[ "$RUN_ALL" == "true" ]]; then
+    # Run both linting and formatting
+    if [[ "$FIX_MODE" == "true" ]]; then
+        if ! run_ruff "ruff check --fix --unsafe-fixes $PATHS" "Linting with auto-fix"; then
+            exit_code=1
+        fi
+    else
+        if ! run_ruff "ruff check $PATHS" "Linting"; then
+            exit_code=1
+        fi
+    fi
+    
+    if ! run_ruff "ruff format $PATHS" "Code formatting"; then
+        exit_code=1
+    fi
+else
+    # Default: linting only
+    if [[ "$FIX_MODE" == "true" ]]; then
+        if ! run_ruff "ruff check --fix --unsafe-fixes $PATHS" "Linting with auto-fix"; then
+            exit_code=1
+        fi
+    else
+        if ! run_ruff "ruff check $PATHS" "Linting"; then
+            exit_code=1
+        fi
+    fi
+fi
+
+# Summary
+echo -e "\n${BLUE}📊 Summary${NC}"
+echo -e "${BLUE}===========${NC}"
+
+if [[ $exit_code -eq 0 ]]; then
+    echo -e "${GREEN}🎉 All checks passed!${NC}"
+    
+    if [[ "$CHECK_ONLY" == "true" ]]; then
+        echo -e "${GREEN}Code quality check: PASSED${NC}"
+    fi
+else
+    echo -e "${RED}❌ Some checks failed${NC}"
+    
+    if [[ "$CHECK_ONLY" == "true" ]]; then
+        echo -e "${RED}Code quality check: FAILED${NC}"
+        echo -e "${YELLOW}Run './bin/lint --fix' to automatically fix issues${NC}"
+    fi
+fi
+
+# Additional tips
+if [[ $exit_code -ne 0 ]] && [[ "$FIX_MODE" == "false" ]]; then
+    echo -e "\n${YELLOW}💡 Tips:${NC}"
+    echo -e "  • Run ${BLUE}./bin/lint --fix${NC} to automatically fix issues"
+    echo -e "  • Run ${BLUE}./bin/lint --all${NC} to lint and format code"
+    echo -e "  • Run ${BLUE}./bin/lint --help${NC} for more options"
+fi
+
+exit $exit_code

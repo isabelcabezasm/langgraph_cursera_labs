@@ -1,11 +1,11 @@
-import json  # Import for JSON serialization
+import os
+from typing import Dict, List
+
 from azure.ai.inference import ChatCompletionsClient
 from azure.ai.inference.models import SystemMessage, UserMessage
 from azure.core.credentials import AzureKeyCredential
-from typing import Dict, List
-from langchain.schema import Document
-import os
 from dotenv import load_dotenv
+from langchain.schema import Document
 
 # Load environment variables from .env file
 load_dotenv()
@@ -13,7 +13,7 @@ load_dotenv()
 # Azure AI setup - these should be configured in your environment variables or settings
 azure_base_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
 azure_api_key = os.getenv("AZURE_OPENAI_API_KEY")
-# GPT-4o or GPT-4-turbo These models are ideal for evaluating the consistency and groundedness of 
+# GPT-4o or GPT-4-turbo These models are ideal for evaluating the consistency and groundedness of
 # generated answers against retrieved documents. They support structured prompting and can be used in evaluation pipelines.
 azure_deployment_name = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
 
@@ -24,9 +24,9 @@ azure_endpoint = f"{azure_base_endpoint}openai/deployments/{azure_deployment_nam
 client = None
 if azure_base_endpoint and azure_api_key and azure_deployment_name:
     client = ChatCompletionsClient(
-        endpoint=azure_endpoint,
-        credential=AzureKeyCredential(azure_api_key)
+        endpoint=azure_endpoint, credential=AzureKeyCredential(azure_api_key)
     )
+
 
 class VerificationAgent:
     def __init__(self):
@@ -35,7 +35,9 @@ class VerificationAgent:
         """
         # Initialize the Azure AI client
         if client is None:
-            raise ValueError("Azure AI client not initialized. Please check your environment variables.")
+            raise ValueError(
+                "Azure AI client not initialized. Please check your environment variables."
+            )
         print("Initializing VerificationAgent with Azure AI...")
         self.client = client
         self.deployment_name = azure_deployment_name
@@ -82,16 +84,16 @@ class VerificationAgent:
         Parse the LLM's verification response into a structured dictionary.
         """
         try:
-            lines = response_text.split('\n')
+            lines = response_text.split("\n")
             verification = {}
             valid_keys_found = 0
-            
+
             for line in lines:
-                if ':' in line:
-                    key, value = line.split(':', 1)
+                if ":" in line:
+                    key, value = line.split(":", 1)
                     key = key.strip()
                     value = value.strip()
-                    
+
                     # Normalize key to match expected format
                     if key.lower() == "supported":
                         final_key = "Supported"
@@ -110,13 +112,17 @@ class VerificationAgent:
                         valid_keys_found += 1
                     else:
                         continue  # Skip unknown keys
-                    
+
                     if final_key in {"Unsupported Claims", "Contradictions"}:
                         # Convert string list to actual list
-                        if value.startswith('[') and value.endswith(']'):
-                            items = value[1:-1].split(',')
+                        if value.startswith("[") and value.endswith("]"):
+                            items = value[1:-1].split(",")
                             # Remove any surrounding quotes and whitespace
-                            items = [item.strip().strip('"').strip("'") for item in items if item.strip()]
+                            items = [
+                                item.strip().strip('"').strip("'")
+                                for item in items
+                                if item.strip()
+                            ]
                             verification[final_key] = items
                         else:
                             verification[final_key] = []
@@ -124,13 +130,19 @@ class VerificationAgent:
                         verification[final_key] = value
                     else:
                         verification[final_key] = value.upper()
-            
+
             # If no valid keys were found, return None (malformed response)
             if valid_keys_found == 0:
                 return None
-            
+
             # Ensure all keys are present
-            for key in ["Supported", "Unsupported Claims", "Contradictions", "Relevant", "Additional Details"]:
+            for key in [
+                "Supported",
+                "Unsupported Claims",
+                "Contradictions",
+                "Relevant",
+                "Additional Details",
+            ]:
                 if key not in verification:
                     if key in {"Unsupported Claims", "Contradictions"}:
                         verification[key] = []
@@ -158,19 +170,19 @@ class VerificationAgent:
         if unsupported_claims:
             report += f"**Unsupported Claims:** {', '.join(unsupported_claims)}\n"
         else:
-            report += f"**Unsupported Claims:** None\n"
+            report += "**Unsupported Claims:** None\n"
 
         if contradictions:
             report += f"**Contradictions:** {', '.join(contradictions)}\n"
         else:
-            report += f"**Contradictions:** None\n"
+            report += "**Contradictions:** None\n"
 
         report += f"**Relevant:** {relevant}\n"
 
         if additional_details:
             report += f"**Additional Details:** {additional_details}\n"
         else:
-            report += f"**Additional Details:** None\n"
+            report += "**Additional Details:** None\n"
 
         return report
 
@@ -178,7 +190,9 @@ class VerificationAgent:
         """
         Verify the answer against the provided documents.
         """
-        print(f"VerificationAgent.check called with answer='{answer}' and {len(documents)} documents.")
+        print(
+            f"VerificationAgent.check called with answer='{answer}' and {len(documents)} documents."
+        )
 
         # Combine all document contents into one string without truncation
         context = "\n\n".join([doc.page_content for doc in documents])
@@ -193,12 +207,14 @@ class VerificationAgent:
             print("Sending prompt to the model...")
             response = self.client.complete(
                 messages=[
-                    SystemMessage(content="You are an AI assistant designed to verify the accuracy and relevance of answers based on the provided context."),
-                    UserMessage(content=prompt)
+                    SystemMessage(
+                        content="You are an AI assistant designed to verify the accuracy and relevance of answers based on the provided context."
+                    ),
+                    UserMessage(content=prompt),
                 ],
                 model=self.deployment_name,
                 temperature=0.0,
-                max_tokens=200
+                max_tokens=200,
             )
             print("LLM response received.")
         except Exception as e:
@@ -216,18 +232,22 @@ class VerificationAgent:
                 "Unsupported Claims": [],
                 "Contradictions": [],
                 "Relevant": "NO",
-                "Additional Details": "Invalid response structure from the model."
+                "Additional Details": "Invalid response structure from the model.",
             }
-            verification_report_formatted = self.format_verification_report(verification_report)
+            verification_report_formatted = self.format_verification_report(
+                verification_report
+            )
             print(f"Verification report:\n{verification_report_formatted}")
             print(f"Context used: {context}")
             return {
                 "verification_report": verification_report_formatted,
-                "context_used": context
+                "context_used": context,
             }
 
         # Sanitize the response
-        sanitized_response = self.sanitize_response(llm_response) if llm_response else ""
+        sanitized_response = (
+            self.sanitize_response(llm_response) if llm_response else ""
+        )
         if not sanitized_response:
             print("LLM returned an empty response.")
             verification_report = {
@@ -235,27 +255,31 @@ class VerificationAgent:
                 "Unsupported Claims": [],
                 "Contradictions": [],
                 "Relevant": "NO",
-                "Additional Details": "Empty response from the model."
+                "Additional Details": "Empty response from the model.",
             }
         else:
             # Parse the response into the expected format
             verification_report = self.parse_verification_response(sanitized_response)
             if verification_report is None:
-                print("LLM did not respond with the expected format. Using default verification report.")
+                print(
+                    "LLM did not respond with the expected format. Using default verification report."
+                )
                 verification_report = {
                     "Supported": "NO",
                     "Unsupported Claims": [],
                     "Contradictions": [],
                     "Relevant": "NO",
-                    "Additional Details": "Failed to parse the model's response."
+                    "Additional Details": "Failed to parse the model's response.",
                 }
 
         # Format the verification report into a paragraph
-        verification_report_formatted = self.format_verification_report(verification_report)
+        verification_report_formatted = self.format_verification_report(
+            verification_report
+        )
         print(f"Verification report:\n{verification_report_formatted}")
         print(f"Context used: {context}")
 
         return {
             "verification_report": verification_report_formatted,
-            "context_used": context
+            "context_used": context,
         }
