@@ -13,18 +13,8 @@ Q&A chatbot that provides different responses based on available context, with A
 ### Lab 02: Reflection Agent
 Self-improving AI agent that generates content, critiques it, and refines through iterative reflection cycles. Specialized for LinkedIn content generation.
 
-### Lab 03: Reflection Agent with External Knowledge (3 variants)
-
-**Original (`lab03_01_reflexion_agent.ipynb`)**
+### Lab 03: Reflection Agent with External Knowledge
 Uses Tavily Search API for real-time web search and external knowledge integration.
-
-**Bing Search (`lab03_02_reflexion_agent_using_bing_websearch.ipynb`)**  
-Azure Bing Search integration with native Microsoft ecosystem support.
-
-**LangChain Bing (`lab03_03_reflexion_agent_using_langchain_tool_bing_search.ipynb`)**
-Uses LangChain's standardized Bing Search tools for consistent interface patterns.
-
-All Lab 03 variants implement the same AI agent with different search providers for external knowledge retrieval.
 
 ### Lab 04: ReAct Agent with Tool Calling
 Implementation of the ReAct (Reasoning and Acting) pattern with multi-tool integration. Demonstrates both manual step-by-step execution and automated graph-based workflow using Tavily search and clothing recommendation tools.
@@ -47,18 +37,13 @@ Hands-on exercise creating a news summarization tool that works with web search 
    AZURE_OPENAI_ENDPOINT=your_endpoint  
    OPENAI_API_VERSION=2024-12-01-preview
    TAVILY_API_KEY=your_tavily_key        # For original Lab 03
-   BING_SEARCH_API_KEY=your_bing_key     # For Bing variants
    ```
 3. Run notebooks in `src/notebooks/`
 
 ## API Keys Required
 
 - **Azure OpenAI**: All labs except 01.1
-- **Tavily Search**: Original Lab 03 and Lab 04
-- **Bing Search**: Lab 03 Bing variants only
-
-## Notes
+   - **Tavily Search**: Lab 03 and Lab 04
 
 - All labs updated to use StateGraph (LangGraph v1.0+)
 - Dev container includes all required dependencies
-- Choose Lab 03 variant based on your preferred search provider
